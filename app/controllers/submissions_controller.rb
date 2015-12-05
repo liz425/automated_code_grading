@@ -1,6 +1,3 @@
-#require_relative 'grading/executor/java_executor'
-require_relative 'grading/executor_factory'
-require_relative 'grading/executor/execute_result'
 
 class SubmissionsController < ApplicationController
   before_action :set_submission, only: [:show, :edit, :update, :destroy]
@@ -52,6 +49,28 @@ class SubmissionsController < ApplicationController
     @homework = Homework.find(params[:homework_id])
   end
 
+  #  instructor view student's submission history
+  def all_submission_history
+    if session[:user_role] != 'instructor'
+      redirect_to login_path
+    else
+    @user = User.find(session[:user_id])
+    @submissions = Submission.where(:course_id => params[:course_id]).where(:homework_id => params[:homework_id])
+    @homework = Homework.find(params[:homework_id])
+    end
+  end
+
+  def specific_stu_hw_submissions
+    if session[:user_role] != 'instructor'
+      redirect_to login_path
+    else
+    @user = User.find(session[:user_id])
+    @submissions = Submission.where(:user_id => params[:student_id]).where(:homework_id => params[:homework_id])
+    @homework = Homework.find(params[:homework_id])
+    @student = User.find(params[:student_id])
+    end
+  end
+
   def mkdir(directory)
     token = directory.split('/')
     1.upto(token.size)  do |n|
@@ -70,8 +89,11 @@ class SubmissionsController < ApplicationController
     time = current_time.strftime('%Y_%m_%d-%H_%M_%S')
     file_type = params[:file].original_filename.partition('.')[-1]
     file_name = time + '.' + file_type
+    file_name = file_name.tr(' ','_')
 
     directory = './UPLOAD/' + @course.course_name + '/' + @homework.hw_name + '/' + @user.user_login_name + '/' + num_submission.to_s
+    directory = directory.tr(' ','_')
+
     path_file = File.join(directory, file_name)
 
     mkdir(directory)
@@ -89,7 +111,12 @@ class SubmissionsController < ApplicationController
     #`cp #{Rails.root.to_s + '/' + path_file} #{Rails.root.to_s + '/' + directory + '/main.java'}`
 
     testcase_path = Rails.root.to_s + '/' + @courseToHomework.hw_test_case_dir + '/'
-    grading_result = ExecutorFactory.get_executor(Rails.root.to_s + '/' + directory, "java", Rails.root.to_s + '/' + path_file, testcase_path + 'input', testcase_path + 'output').execute
+    ext_string = File.extname(path_file)
+    if ext_string == ".java"
+      grading_result = ExecutorFactory.get_executor(Rails.root.to_s + '/' + directory, "java", Rails.root.to_s + '/' + path_file, testcase_path + 'input', testcase_path + 'output').execute
+    else# if ext_string == ".py"
+      grading_result = ExecutorFactory.get_executor(Rails.root.to_s + '/' + directory, "python", Rails.root.to_s + '/' + path_file, testcase_path + 'input', testcase_path + 'output').execute
+    end
     @submission[:sm_grade] = grading_result.get_score
     @submission[:sm_judgement] = grading_result.get_judgement
     @submission[:sm_src_dir] = path_file

@@ -60,7 +60,12 @@ class HomeworksController < ApplicationController
       @user = User.find(session[:user_id])
       @course = Course.find(params[:course_id])
       @homework = Homework.find(params[:homework_id])
-      @time_left = time_diff_string(@homework.hw_due_time - Time.zone.now)
+      homework_timeLeft = @homework.hw_due_time - Time.zone.now
+      if homework_timeLeft < 0
+        @time_left = '-' + time_diff_string(-homework_timeLeft)
+      else
+        @time_left = time_diff_string(homework_timeLeft)
+      end
       @user_in_course = @course.users.size
       @user_valid = Submission.where(course_id: params[:course_id], homework_id: params[:homework_id]).select(:user_id).map(&:user_id).uniq.size
       @average_grade = Submission.where(course_id: params[:course_id], homework_id: params[:homework_id]).average(:sm_grade)
@@ -75,6 +80,18 @@ class HomeworksController < ApplicationController
       #@course = Course.find(params[:course_id])
       @homework = Homework.find(params[:homework_id])
     end
+  end
+
+  def view_student_record
+    if session[:user_role] != 'instructor'
+      redirect_to login_path
+    else
+    @user = User.find(session[:user_id])
+    @username = User.find(session[:user_id]).user_name
+    @student = User.find(params[:student_id])
+      end
+    #@submissions = Submission.where(:course_id => params[:course_id]).where(:homework_id => params[:homework_id])
+    #@homework = Homework.find(params[:homework_id])
   end
 
 
@@ -100,6 +117,7 @@ class HomeworksController < ApplicationController
     @homework.save
 
     directory = './UPLOAD/' + @course.course_name + '/' + @homework[:hw_name] + '/'
+    directory = directory.tr(' ', '_')
 
     mkdir(directory)
     if !params[:testcase_input].nil?

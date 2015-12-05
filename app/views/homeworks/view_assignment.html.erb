@@ -13,15 +13,16 @@
     <div>
       <ul class="breadcrumb">
         <li>
-          <a href=show_instructor>Home</a>
+          <i class="glyphicon glyphicon-home"></i>&nbsp<a href=show_instructor>Home</a>
         </li>
         <li>
+          <span class="glyphicon glyphicon-list-alt"></span>&nbsp
           <%= link_to homework_history_path(:course_id => 1, :homework_id => 1) do %>
-              <span class="glyphicon glyphicon-list-alt"></span> Homework History
+               Homework History
           <%end%>
         </li>
         <li>
-          <%= @homework.hw_name%>
+          <span class="glyphicon glyphicon-book"></span>&nbsp<%= @homework.hw_name%>
         </li>
       </ul>
     </div>
@@ -43,9 +44,9 @@
               <div class="clearfix"></div><br>
               <form action="/html/tags/html_form_tag_action.cfm" method="post">
 
-                <div class="box-content row" style="width: 50%; text-align: justify; ">
-                  <%=@homework.hw_description%>
-                </div>
+                <textarea name="contents" id="contents" disabled style="width: 50%;text-align:justify; padding: 2%; height: 500px; font:20px italic; border: 10px double gray; ">
+<%=@homework.hw_description%>
+                                  </textarea><br>
                 <div class="clearfix"></div><br>
               </form>
             </center>

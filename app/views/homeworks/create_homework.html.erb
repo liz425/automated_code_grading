@@ -16,10 +16,10 @@
       <div>
         <ul class="breadcrumb">
           <li>
-            <a href=show_instructor>Home</a>
+            <i class="glyphicon glyphicon-home"></i>&nbsp<a href=show_instructor>Home</a>
           </li>
           <li>
-            Assign new homework
+            <span class="glyphicon glyphicon-edit"></span>&nbspAssign new homework
           </li>
         </ul>
       </div>
@@ -75,7 +75,7 @@
                     <%= datetime_select(:time, 'due_time') %>
                     <h4>Release date</h4>
                     <%= datetime_select(:time, 'release_time') %>
-                      <input type="hidden" id="course_id" name="course_id" value="1">
+                      <input type="hidden" id="course_id" name="course_id" value="<%= @user.courses.first.id if @user.courses.first %>">
 
                       <br/>
                       <br/>
